@@ -81,6 +81,7 @@ public class CrawlerDataReceiver {
 		obj.put("reasonRead", 0);
 		obj.put("uMode", null);
 		obj.put("isTop", 0);
+		obj.put("md5", "");//内容的md5编码
 		return obj;
 	}
 	
@@ -136,25 +137,37 @@ public class CrawlerDataReceiver {
 //	    System.out.println(object.toJSONString());
 //	    System.out.println("*******************************************");
 		
+		String md5 = codec.md5((String)object.get("content"));// 发布文章内容的md5编码
+		
 	    String _id = (String)obj.get("_id");
+	    String _md5 = (String)obj.get("md5");// 数据库中保存的md5编码
+	    Long _time = (Long)obj.get("time");
 	    
 		if("0".equals(_id)){
 			// 新增
+			object.put("md5", md5);
 			result = content.crawlerInsert(object);
+			
 	        JSONObject json = JSONObject.toJSON(result);
 	        if (json.getInt("errorcode") == 0) {
 	            LogsUtils.addLogs("999", "爬虫服务程序", "在[" + ogname + "]栏目下发布了[" + object.getString("mainName") + "]新闻", "1", "PublishArticle");
 	            
 	        }else{
-	        	System.out.println("**************  新增文章失败  **************");
+	        	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
 	        }
 		}else{
-			System.out.println("************** 文章已存在【 "+ _id +" 】**************");
-			// 文章内容对比，如果内容有更新则进行更新操作
-			if(!codec.md5((String)obj.get("content")).equals(codec.md5((String)object.get("content")))){
+			System.out.println("************** 文章已存在【 "+object.getString("mainName")+" ("+ _id +") 】**************");
+			// 文章内容对比，如果内容不同则认为是发布一篇新的文章
+			if(!md5.equals(_md5)){
+				object.put("md5", md5);
+				object.put("content", obj.get("content"));
+				result = content.crawlerInsert(object);
+				
+				/* 更新已有文章内容，实际情况是经常有相同标题的文章出现，会覆盖旧文章内容
 				object.put("_id", _id);
-				object.put("content", obj.get("content"));//对发布的时间不做更新
-				result = content.crawlerUpdate(object);
+				object.put("md5", md5);
+				object.put("content", obj.get("content"));
+				result = content.crawlerUpdate(object);*/
 			}
 		}
 		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"文章已存在不做更新":result)+"  ***");

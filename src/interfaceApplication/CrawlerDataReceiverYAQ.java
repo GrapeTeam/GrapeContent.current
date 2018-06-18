@@ -1,6 +1,5 @@
 package interfaceApplication;
 
-import org.json.JSONArray;
 import org.json.simple.JSONObject;
 
 import common.java.httpServer.grapeHttpUnit;
@@ -12,6 +11,8 @@ import common.java.rpc.execRequest;
  *
  */
 public class CrawlerDataReceiverYAQ {
+	private String wbid = "597ff7609c93690f5a54291b";
+	
 	// 通知公告,ogid:"59b0e9d5780c9b21501398bd"
 	public String publishTZGG(){
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
@@ -25,7 +26,7 @@ public class CrawlerDataReceiverYAQ {
 			receiveJSON.put("source",source);
 		}
 		
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9d5780c9b21501398bd","597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9d5780c9b21501398bd", wbid);
 	}
 	
 	// 热点关注,ogid:"59b0ea0a780c9b21501398c3"
@@ -35,7 +36,7 @@ public class CrawlerDataReceiverYAQ {
 		if(null != receiveJSON){
 			receiveJSON.put("source", "安徽纪检监察网");
 		}
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea0a780c9b21501398c3" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea0a780c9b21501398c3" ,wbid);
 	
 	}
 	
@@ -52,7 +53,7 @@ public class CrawlerDataReceiverYAQ {
 			receiveJSON.put("source",source);
 		}
 		
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9e1780c9b21501398be" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9e1780c9b21501398be" ,wbid);
 	}
 	
 	// 政策法规,ogid:"59b0e9f1780c9b21501398c1"
@@ -63,7 +64,7 @@ public class CrawlerDataReceiverYAQ {
 			receiveJSON.put("source","铜陵市人力资源和社会保障局");
 		}
 		
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
 	}
 	
 	public String publishZCFG_2(){
@@ -73,7 +74,7 @@ public class CrawlerDataReceiverYAQ {
 			receiveJSON.put("source","铜陵市卫生和计划生育委员会");
 		}
 		
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
 	}
 	
 	public String publishZCFG_3(){
@@ -83,7 +84,7 @@ public class CrawlerDataReceiverYAQ {
 			receiveJSON.put("source","铜陵市民政局");
 		}
 		
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
 	}
 	
 	// 咨询选登（后台管理系统没看到有该栏目）,ogid:
@@ -95,13 +96,13 @@ public class CrawlerDataReceiverYAQ {
 	public String publishFZDT(){
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
-		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea01780c9b21501398c2" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea01780c9b21501398c2" ,wbid);
 	}
 	
 	// 监督曝光,ogid:"5a2f30ec64ebaeb5b0005e9c"
 	public String publishJDBG(){
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
-		return CrawlerDataReceiver.publish(receiveJSON, "5a2f30ec64ebaeb5b0005e9c" ,"597ff7609c93690f5a542");
+		return CrawlerDataReceiver.publish(receiveJSON, "5a2f30ec64ebaeb5b0005e9c" ,wbid);
 	}
 }

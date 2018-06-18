@@ -124,7 +124,7 @@ public class RequestCrawlerService {
 		String[] ids_yaq = new String[] {"101","103","105","106","108","110","112","116","117","119","121"};//义安区五务
 		String[] ids_qw = new String[] {"11","13","15","17"};//铜陵市企务
 		
-		String[] ids = new String[]{"105","110","112","116","117","119","121"};
+		String[] ids = new String[]{"121"};
 		
 		for(String id: ids){
 			String url = rootPath + id;
