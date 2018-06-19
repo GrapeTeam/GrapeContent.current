@@ -85,6 +85,25 @@ public class CrawlerDataReceiverQW {
 	public String publishYASJ(){
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		
+		if(null != receiveJSON){
+			if(null!=receiveJSON.get("source")){
+				// source格式"来源：中国纪检监察报"
+				String source = (String)receiveJSON.get("source");
+				int pos1=source.indexOf("：");
+				source = source.substring(pos1+1).trim();
+				receiveJSON.put("source",source);
+			}
+			if(null!=receiveJSON.get("publishDate")){
+				// publishDate格式"发布时间：2018-06-14 08:41"
+				String publishDate = (String)receiveJSON.get("publishDate");
+				int pos1=publishDate.indexOf("：");
+				publishDate = publishDate.substring(pos1+1).trim();
+				receiveJSON.put("publishDate",publishDate);
+			}
+
+		}
+		
 		return CrawlerDataReceiver.publish(receiveJSON, "59433f32c6c204111c8aa946", wbid);
 	}
 	

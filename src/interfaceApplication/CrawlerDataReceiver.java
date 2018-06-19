@@ -1,6 +1,5 @@
 package interfaceApplication;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 import org.json.simple.JSONObject;
@@ -22,9 +21,11 @@ public class CrawlerDataReceiver {
 			return null;
 		}
 		
-		String _httpContent = (String)post.get("content");
-		String content = codec.DecodeFastJSON(_httpContent);//对content的内容进行解码
-		post.put("content", content);
+		if(null != post.get("content")){
+			String _httpContent = (String)post.get("content");
+			String content = codec.DecodeFastJSON(_httpContent);//对content的内容进行解码
+			post.put("content", content);	
+		}
 		
 //		String data = post.toJSONString();
 //		JSONObject result = new JSONObject();
@@ -100,7 +101,6 @@ public class CrawlerDataReceiver {
 		
 		long time = 0L;
 		String temptime = "";
-		String ogname = ""; // 栏目名称
 		
 		long currentTime = TimeHelper.nowMillis();
 		
@@ -122,23 +122,36 @@ public class CrawlerDataReceiver {
         object.put("mainName",receiveJSON.get("title"));// 标题
         object.put("subName", receiveJSON.get("subtitle"));//副标题
         object.put("souce",receiveJSON.get("source"));// 来源
+        object.put("contenturl",receiveJSON.get("contenturl"));// 新闻链接地址
+       
+        String result = "";
         
+        if("59433f4ac6c204111c8aa947".equals(ogid)){
+        	// 企务公开->视频锦集，发布链接地址
+        	result = publicLink(ogid, object);
+        }else{
+        	result = publicContent(ogid, object);
+        }
+        
+        
+        
+        return result;
+	
+	}
+	
+	/**
+	 * 发布内容
+	 * @return
+	 */
+	public static String publicContent(String ogid, JSONObject object){
+		String result = "";
         ContentGroup contentGroup = new ContentGroup();
-        ogname = WebUtils.getOgname_by_ogid(ogid);
-
-        contentGroup.publishActicle_than_update(ogid);
+        String ogname = WebUtils.getOgname_by_ogid(ogid);
         
 		Content content = new Content();
 		JSONObject obj = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
 		
-		String result ="";
-		
-//		System.out.println("**************  爬虫信息采集内容     **************");
-//	    System.out.println(object.toJSONString());
-//	    System.out.println("*******************************************");
-		
 		String md5 = codec.md5((String)object.get("content"));// 发布文章内容的md5编码
-		
 	    String _id = (String)obj.get("_id");
 	    String _md5 = (String)obj.get("md5");// 数据库中保存的md5编码
 	    Long _time = (Long)obj.get("time");
@@ -171,8 +184,51 @@ public class CrawlerDataReceiver {
 			}
 		}
 		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"文章已存在不做更新":result)+"  ***");
-        return result;
+		return result;
+	}
 	
+	/**
+	 * 发布链接
+	 * @return
+	 */
+	public static String publicLink(String ogid, JSONObject object){
+		String result = "";
+		object.remove("content");
+        ContentGroup contentGroup = new ContentGroup();
+        String ogname = WebUtils.getOgname_by_ogid(ogid);
+        
+		Content content = new Content();
+		JSONObject obj = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
+		
+		String contenturl = object.get("contenturl")==null?"":(String)object.get("contenturl");
+		
+	    String _id = (String)obj.get("_id");
+	    Long _time = (Long)obj.get("time");
+	    String _contenturl = obj.get("contenturl")==null?"":(String)obj.get("contenturl");
+	    
+	    object.put("contenturl", contenturl);
+	    
+		if("0".equals(_id)){
+			// 新增
+			result = content.crawlerInsert(object);
+			
+	        JSONObject json = JSONObject.toJSON(result);
+	        if (json.getInt("errorcode") == 0) {
+	            LogsUtils.addLogs("999", "爬虫服务程序", "在[" + ogname + "]栏目下发布了[" + object.getString("mainName") + "]新闻链接", "1", "PublishArticle");
+	            
+	        }else{
+	        	System.out.println("**************  新增新闻链接【 "+object.getString("mainName")+"】失败  ************** ");
+	        }
+		}else{
+			System.out.println("************** 新闻链接已存在【 "+object.getString("mainName")+" ("+ _id +") 】**************");
+			// 标题相同，链接地址不同，认为是更新当前新闻的链接地址
+			if(!contenturl.equals(_contenturl)){
+				object.put("_id", _id);
+				result = content.crawlerUpdate(object);
+			}
+		}
+		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"文章链接已存在不做更新":result)+"  ***");
+		return result;
 	}
 	
     public static int RandomNum() {

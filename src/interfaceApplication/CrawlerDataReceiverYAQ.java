@@ -34,7 +34,8 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null != receiveJSON){
-			receiveJSON.put("source", "安徽纪检监察网");
+			String source = receiveJSON.get("source") == null ? "安徽纪检监察网" : (String)receiveJSON.get("source");
+			receiveJSON.put("source",source);
 		}
 		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea0a780c9b21501398c3" ,wbid);
 	
@@ -61,7 +62,8 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
-			receiveJSON.put("source","铜陵市人力资源和社会保障局");
+			String source = receiveJSON.get("source") == null ? "铜陵市人力资源和社会保障局" : (String)receiveJSON.get("source");
+			receiveJSON.put("source",source);
 		}
 		
 		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
@@ -71,7 +73,8 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
-			receiveJSON.put("source","铜陵市卫生和计划生育委员会");
+			String source = receiveJSON.get("source") == null ? "铜陵市卫生和计划生育委员会" : (String)receiveJSON.get("source");
+			receiveJSON.put("source",source);
 		}
 		
 		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
@@ -81,7 +84,19 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
-			receiveJSON.put("source","铜陵市民政局");
+			String source = receiveJSON.get("source") == null ? "铜陵市民政局" : (String)receiveJSON.get("source");
+			receiveJSON.put("source",source);
+		}
+		
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
+	}
+	
+	public String publishZCFG_4(){
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		if(null!=receiveJSON){
+			String source = receiveJSON.get("source") == null ? "铜陵市教育局" : (String)receiveJSON.get("source");
+			receiveJSON.put("source",source);
 		}
 		
 		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
@@ -89,7 +104,13 @@ public class CrawlerDataReceiverYAQ {
 	
 	// 咨询选登（后台管理系统没看到有该栏目）,ogid:
 	public String publishZXXD(){
-		return "";
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		if(null!=receiveJSON){
+			receiveJSON.put("source","铜陵市义安区人民政府");
+		}
+		
+		return CrawlerDataReceiver.publish(receiveJSON, "" ,wbid);
 	}
 	
 	// 反腐动态,ogid:"59b0ea01780c9b21501398c2"
