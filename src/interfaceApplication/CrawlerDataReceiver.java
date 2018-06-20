@@ -2,6 +2,7 @@ package interfaceApplication;
 
 import java.util.Random;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.simple.JSONObject;
 
 import common.java.security.codec;
@@ -151,7 +152,13 @@ public class CrawlerDataReceiver {
 		Content content = new Content();
 		JSONObject obj = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
 		
-		String md5 = codec.md5((String)object.get("content"));// 发布文章内容的md5编码
+		String contentStr = (String)object.get("content");
+		if(contentStr.indexOf("&amp;lt;")>-1){// 出现两次转码的情况
+			contentStr = StringEscapeUtils.unescapeHtml4(contentStr);
+			object.put("content", contentStr);
+		}
+		
+		String md5 = codec.md5(contentStr);// 发布文章内容的md5编码
 	    String _id = (String)obj.get("_id");
 	    String _md5 = (String)obj.get("md5");// 数据库中保存的md5编码
 	    Long _time = (Long)obj.get("time");
@@ -173,7 +180,6 @@ public class CrawlerDataReceiver {
 			// 文章内容对比，如果内容不同则认为是发布一篇新的文章
 			if(!md5.equals(_md5)){
 				object.put("md5", md5);
-				object.put("content", obj.get("content"));
 				result = content.crawlerInsert(object);
 				
 				/* 更新已有文章内容，实际情况是经常有相同标题的文章出现，会覆盖旧文章内容

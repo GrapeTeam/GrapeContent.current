@@ -19,7 +19,7 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
 			String publishDate = receiveJSON.get("publishDate") == null ?"":(String)receiveJSON.get("publishDate");
-			String source = receiveJSON.get("source") == null ?"":(String)receiveJSON.get("source");
+			String source = receiveJSON.get("source") == null ?"铜陵市义安区人民政府":(String)receiveJSON.get("source");
 			
 			publishDate = publishDate.substring(publishDate.indexOf("：")+1).trim();
 			source = source.substring(source.indexOf("：")+1).trim();
@@ -47,7 +47,7 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
 			String publishDate = receiveJSON.get("publishDate") == null ?"":(String)receiveJSON.get("publishDate");
-			String source = receiveJSON.get("source") == null ?"":(String)receiveJSON.get("source");
+			String source = receiveJSON.get("source") == null ?"铜陵市义安区人民政府":(String)receiveJSON.get("source");
 			
 			publishDate = publishDate.substring(publishDate.indexOf("：")+1).trim();
 			source = source.substring(source.indexOf("：")+1).trim();
