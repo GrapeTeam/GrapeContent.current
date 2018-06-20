@@ -62,10 +62,7 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
-			String source = receiveJSON.get("source") == null ? "铜陵市人力资源和社会保障局" : (String)receiveJSON.get("source");
-			if(source.indexOf("编辑日期") > -1){
-				source = "铜陵人力资源和社会保障网";
-			}
+			String source = "铜陵人力资源和社会保障网";
 			receiveJSON.put("source",source);
 		}
 		
