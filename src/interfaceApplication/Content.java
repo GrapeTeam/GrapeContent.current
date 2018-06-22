@@ -2441,7 +2441,7 @@ public class Content {
      * @param mainName	标题名称
      * @return _id		如果文章已存在则返回主键ID，取第一条标题相同的文章ID
      */
-    public JSONObject CrawlerContentIsExist(String ogid, String mainName){
+    public JSONArray CrawlerContentIsExist(String ogid, String mainName){
     	JSONObject result = new JSONObject();
     	result.put("_id", "0");
     	
@@ -2454,10 +2454,9 @@ public class Content {
             	Object object2 = var9.next();
             	result = (JSONObject)object2;
                 result.put("_id", result.getString(this.pkString));
-                break;
             }
         }
-    	return result;
+    	return object;
     }
     
     protected String crawlerUpdate(JSONObject object) {

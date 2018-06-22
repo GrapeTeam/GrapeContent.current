@@ -3,6 +3,7 @@ package interfaceApplication;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import common.java.security.codec;
@@ -150,7 +151,8 @@ public class CrawlerDataReceiver {
         String ogname = WebUtils.getOgname_by_ogid(ogid);
         
 		Content content = new Content();
-		JSONObject obj = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
+		
+		JSONArray objArray = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
 		
 		String contentStr = (String)object.get("content");
 		if(contentStr.indexOf("&amp;lt;")>-1){// 出现两次转码的情况
@@ -159,13 +161,10 @@ public class CrawlerDataReceiver {
 		}
 		
 		String md5 = codec.md5(contentStr);// 发布文章内容的md5编码
-	    String _id = (String)obj.get("_id");
-	    String _md5 = (String)obj.get("md5");// 数据库中保存的md5编码
-	    Long _time = (Long)obj.get("time");
-	    
-		if("0".equals(_id)){
-			// 新增
-			object.put("md5", md5);
+		object.put("md5", md5);
+		
+		if(null == objArray){
+			// 新增文章
 			result = content.crawlerInsert(object);
 			
 	        JSONObject json = JSONObject.toJSON(result);
@@ -176,17 +175,30 @@ public class CrawlerDataReceiver {
 	        	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
 	        }
 		}else{
-			System.out.println("************** 文章已存在【 "+object.getString("mainName")+" ("+ _id +") 】**************");
-			// 文章内容对比，如果内容不同则认为是发布一篇新的文章
-			if(!md5.equals(_md5)){
-				object.put("md5", md5);
+			boolean addFlag = true; // 新增文章标识
+			for(int i = 0; i < objArray.size(); i++){
+				JSONObject obj = (JSONObject) objArray.get(i);
+			    String _id = (String)obj.get("_id");
+			    String _content = (String)obj.get("content");
+			    String _md5 = obj.get("md5") == null ? codec.md5(_content) : (String)obj.get("md5");// 数据库中保存的md5编码
+			    Long _time = (Long)obj.get("time");
+
+			    if(_md5.equals(md5)){
+			    	// 文章已存在，不需要新增和更新
+			    	addFlag = false;
+			    	break;
+			    }
+			}
+			
+			if(addFlag){
+				// 新增文章
 				result = content.crawlerInsert(object);
-				
-				/* 更新已有文章内容，实际情况是经常有相同标题的文章出现，会覆盖旧文章内容
-				object.put("_id", _id);
-				object.put("md5", md5);
-				object.put("content", obj.get("content"));
-				result = content.crawlerUpdate(object);*/
+		        JSONObject json = JSONObject.toJSON(result);
+		        if (json.getInt("errorcode") == 0) {
+		            LogsUtils.addLogs("999", "爬虫服务程序", "在[" + ogname + "]栏目下发布了[" + object.getString("mainName") + "]新闻", "1", "PublishArticle");
+		        }else{
+		        	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
+		        }
 			}
 		}
 		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"文章已存在不做更新":result)+"  ***");
@@ -203,34 +215,36 @@ public class CrawlerDataReceiver {
         ContentGroup contentGroup = new ContentGroup();
         String ogname = WebUtils.getOgname_by_ogid(ogid);
         
+        String contenturl = object.get("contenturl")==null?"":(String)object.get("contenturl");
+        object.put("contenturl", contenturl);
+        
 		Content content = new Content();
-		JSONObject obj = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
 		
-		String contenturl = object.get("contenturl")==null?"":(String)object.get("contenturl");
+		JSONArray objArray = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
 		
-	    String _id = (String)obj.get("_id");
-	    Long _time = (Long)obj.get("time");
-	    String _contenturl = obj.get("contenturl")==null?"":(String)obj.get("contenturl");
-	    
-	    object.put("contenturl", contenturl);
-	    
-		if("0".equals(_id)){
-			// 新增
+		if(null == objArray){
+			// 新增文章
 			result = content.crawlerInsert(object);
-			
 	        JSONObject json = JSONObject.toJSON(result);
 	        if (json.getInt("errorcode") == 0) {
 	            LogsUtils.addLogs("999", "爬虫服务程序", "在[" + ogname + "]栏目下发布了[" + object.getString("mainName") + "]新闻链接", "1", "PublishArticle");
+	            System.out.println("**************  发布新增新闻链接【 "+object.getString("mainName")+"】成功  ************** ");
 	            
 	        }else{
-	        	System.out.println("**************  新增新闻链接【 "+object.getString("mainName")+"】失败  ************** ");
+	        	System.out.println("**************  发布新增新闻链接【 "+object.getString("mainName")+"】失败  ************** ");
 	        }
 		}else{
-			System.out.println("************** 新闻链接已存在【 "+object.getString("mainName")+" ("+ _id +") 】**************");
-			// 标题相同，链接地址不同，认为是更新当前新闻的链接地址
-			if(!contenturl.equals(_contenturl)){
-				object.put("_id", _id);
-				result = content.crawlerUpdate(object);
+			for(int i=0; i <objArray.size(); i++){
+				JSONObject obj = (JSONObject)objArray.get(i);
+			    String _id = (String)obj.get("_id");
+			    Long _time = (Long)obj.get("time");
+			    String _contenturl = obj.get("contenturl")==null?"":(String)obj.get("contenturl");
+				System.out.println("************** 新闻链接已存在【 "+object.getString("mainName")+" ("+ _id +") 】**************");
+				// 标题相同，链接地址不同，认为是更新当前新闻的链接地址
+				if(!contenturl.equals(_contenturl)){
+					object.put("_id", _id);
+					result = content.crawlerUpdate(object);
+				}
 			}
 		}
 		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"文章链接已存在不做更新":result)+"  ***");
