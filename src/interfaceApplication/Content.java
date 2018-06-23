@@ -154,7 +154,6 @@ public class Content {
                         } finally {
                             appsProxy.setCurrentAppInfo(currentAppInfo);
                             countLocker.unlock();
-                            System.out.println("");
                         }
 
                     }
@@ -540,10 +539,6 @@ public class Content {
             object.put("isvisble", 0);
             object.put("isdelete", 0);
             object.put("subID", this.RandomNum());
-            
-//            System.out.println("**********   object数据   **********");
-//            System.out.println(object.toJSONString());
-//            System.out.println("****************************************************************");
             
             String insert = this.insert(object);
             JSONObject json = JSONObject.toJSON(insert);
@@ -1113,7 +1108,6 @@ public class Content {
     public void test() {
         JSONObject find = this.content.find();
         String long1 = (String)find.get("clickcount");
-        System.out.println();
     }
 
     public String ShowFront(String wbid, int idx, int pageSize, String condString) {
@@ -1375,10 +1369,6 @@ public class Content {
         }
 
         return object;
-    }
-
-    public void iii() {
-        System.out.println("111");
     }
 
     public String jian_cha_chong_fu(int time_interval, String ogids) {
@@ -1820,14 +1810,6 @@ public class Content {
         return rString;
     }
 
-    public void test1() {
-        System.out.println("12");
-        CacheHelper cacheHelper = new CacheHelper();
-        String string = cacheHelper.get("ckdtest");
-        System.out.println(string);
-        cacheHelper.setget("ckdtest1", "陈凯迪", 30L);
-    }
-
     public String total(String rootID, String starTime, String endTime) {
         String rString = this.ch.get("total_time_Count_" + rootID);
         if (rString == null) {
@@ -2125,7 +2107,6 @@ public class Content {
         if (ids != null && !ids.equals("") && !ids.equals("null")) {
             value = ids.split(",");
         }
-
         if (value != null) {
             this.content.or();
             String[] var7 = value;
@@ -2135,10 +2116,8 @@ public class Content {
                 String string = var7[var5];
                 this.content.eq("_id", string);
             }
-
             array = this.content.field("_id,mainName,author,content,desp,image,wbid").limit(8).select();
         }
-
         if (array != null && array.size() > 0) {
             JSONObject object = (JSONObject)array.get(0);
             String wbid = object.getString("wbid");
@@ -2146,7 +2125,6 @@ public class Content {
             array = this.model.getDefaultImage(wbid, array);
             array = this.model.getImgs(array);
         }
-
         return array != null && array.size() > 0 ? array.toString() : (new JSONArray()).toJSONString();
     }
 
@@ -2354,10 +2332,8 @@ public class Content {
                         for(Iterator var11 = array.iterator(); var11.hasNext(); cache.setget(_eventName, rMsg.netMSG(false, perfixs + json.getString("_id")), 3600L)) {
                             Object object = var11.next();
                             json = (JSONObject)object;
-                            System.out.println(json.getString("_id"));
                             privacyPolicy pp = new privacyPolicy();
                             String string = pp.scanText(Jsoup.parse(json.getString("content")).text());
-                            System.out.println("....ok");
                             if (string != null && pp.hasPrivacyPolicy()) {
                                 JSONObject rJson = new JSONObject();
                                 rJson.put("_id", perfixs + json.getString("_id"));
@@ -2379,7 +2355,6 @@ public class Content {
 
     public String getEventProgress(String eventName) {
         CacheHelper cache = new CacheHelper();
-        System.out.println(cache.get(eventName));
         JSONObject rJson = JSONObject.toJSON(cache.get(eventName));
         String content = "";
         if (rJson != null && rJson.containsKey("errorcode") && rJson.getInt("errorcode") == 1) {
