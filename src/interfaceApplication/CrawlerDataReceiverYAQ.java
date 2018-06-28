@@ -38,7 +38,21 @@ public class CrawlerDataReceiverYAQ {
 			receiveJSON.put("source",source);
 		}
 		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea0a780c9b21501398c3" ,wbid);
+	}
 	
+	public String publishRDGZ_1(){
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		if(null != receiveJSON){
+			String source = receiveJSON.get("source") == null ? "安徽省人民政府" : (String)receiveJSON.get("source");
+			// source格式“来源：人民日报”
+			if(source.indexOf("来源：")>-1){
+				source = source.substring(source.indexOf("：")+1).trim();
+			}
+			
+			receiveJSON.put("source",source);
+		}
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0ea0a780c9b21501398c3" ,wbid);
 	}
 	
 	// 工作动态,ogid:"59b0e9e1780c9b21501398be"
@@ -96,6 +110,17 @@ public class CrawlerDataReceiverYAQ {
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
 		if(null!=receiveJSON){
 			String source = receiveJSON.get("source") == null ? "铜陵市教育局" : (String)receiveJSON.get("source");
+			receiveJSON.put("source",source);
+		}
+		
+		return CrawlerDataReceiver.publish(receiveJSON, "59b0e9f1780c9b21501398c1" ,wbid);
+	}
+	
+	public String publishZCFG_5(){
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		if(null!=receiveJSON){
+			String source = receiveJSON.get("source") == null ? "铜陵市人民政府" : (String)receiveJSON.get("source");
 			receiveJSON.put("source",source);
 		}
 		
