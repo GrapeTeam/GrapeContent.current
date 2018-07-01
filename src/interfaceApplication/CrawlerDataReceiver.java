@@ -111,12 +111,12 @@ public class CrawlerDataReceiver {
 		
 		long currentTime = TimeHelper.nowMillis();
 		
-        if (receiveJSON.containsKey("time")) {
-            temptime = receiveJSON.getString("time");
-            if (StringHelper.InvaildString(temptime)) {
-                time = Long.parseLong(temptime);
-            }
-        }
+//        if (receiveJSON.containsKey("time")) {
+//            temptime = receiveJSON.getString("time");
+//            if (StringHelper.InvaildString(temptime)) {
+//                time = Long.parseLong(temptime);
+//            }
+//        }
         if (time != 0L) {
             time = time < currentTime ? time : currentTime;
         } else {

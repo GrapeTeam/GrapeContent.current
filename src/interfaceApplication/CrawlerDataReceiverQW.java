@@ -29,12 +29,26 @@ public class CrawlerDataReceiverQW {
 			String publishDate = "";
 			String source = (String)receiveJSON.get("source");
 			
-			int pos1=source.indexOf("：");
-			int pos2=source.lastIndexOf("：");
+			int pos1=source.indexOf("文章来源：");
+			int pos2=source.indexOf("发布时间：");
+			int beginIndex = -1;
+			int endIndex = -1;
 			
-			publishDate = source.substring(pos1+1, source.indexOf(" ")).trim();
-			source = source.substring(pos2+1).trim();
+			// 发布时间
+			if(pos2 > -1){
+				beginIndex = pos2+5;
+				endIndex = source.indexOf(" ", beginIndex)>0?source.indexOf(" ", beginIndex):source.length();
+				publishDate = source.substring(beginIndex, endIndex);
+			}
 			
+			// 时间来源
+			if(pos1 > -1){
+				beginIndex = pos1+5;
+				endIndex = source.indexOf(" ", beginIndex)>0?source.indexOf(" ", beginIndex):source.length();
+				source = source.substring(beginIndex, endIndex);
+			}else{
+				source = "国务院国资委";
+			}
 			receiveJSON.put("publishDate",publishDate);
 			receiveJSON.put("source",source);
 		}
