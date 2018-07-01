@@ -1,11 +1,16 @@
 package interfaceApplication;
 
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.TextNode;
 
+import cn.wanghaomiao.xpath.model.JXDocument;
 import common.java.security.codec;
 import common.java.string.StringHelper;
 import common.java.time.TimeHelper;
@@ -154,55 +159,107 @@ public class CrawlerDataReceiver {
 		
 		JSONArray objArray = content.CrawlerContentIsExist(ogid, (String)object.get("mainName"));
 		
-		String contentStr = (String)object.get("content");
+		String contentStr = (String)object.get("content"); // html内容
 		if(contentStr.indexOf("&amp;lt;")>-1){// 出现两次转码的情况
 			contentStr = StringEscapeUtils.unescapeHtml4(contentStr);
 			object.put("content", contentStr);
 		}
 		
-		String md5 = codec.md5(contentStr);// 发布文章内容的md5编码
+		String domHTML = StringEscapeUtils.unescapeHtml4(contentStr);
+		Document document = Jsoup.parse(domHTML);
+		List<TextNode> nodes = document.textNodes();
+		String textContent = document.text();// 文本内容
+		object.put("textContent", textContent);
+		
+		String md5 = codec.md5(contentStr);// 针对html内容进行MD5编码
 		object.put("md5", md5);
+		String md5_txt = codec.md5(textContent);// 针对文本内容进行MD5编码
+		object.put("md5_text", md5_txt);
 		
 		if(null == objArray){
 			// 新增文章
-			result = content.crawlerInsert(object);
-			
-	        JSONObject json = JSONObject.toJSON(result);
-	        if (json.getInt("errorcode") == 0) {
-	            LogsUtils.addLogs("999", "爬虫服务程序", "在[" + ogname + "]栏目下发布了[" + object.getString("mainName") + "]新闻", "1", "PublishArticle");
-	            
-	        }else{
-	        	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
-	        }
+			addContent(content, object);
 		}else{
 			boolean addFlag = true; // 新增文章标识
+			String updateId = ""; // 要更新的记录id
+			Long time = 0L;
+			
 			for(int i = 0; i < objArray.size(); i++){
 				JSONObject obj = (JSONObject) objArray.get(i);
 			    String _id = (String)obj.get("_id");
-			    String _content = (String)obj.get("content");
+			    String _content = (String)(obj.get("content") == null?"":obj.get("content"));
+			    String _textContent = (String)(obj.get("textContent") == null?"":obj.get("textContent"));
+			    
 			    String _md5 = obj.get("md5") == null ? codec.md5(_content) : (String)obj.get("md5");// 数据库中保存的md5编码
+			    String _md5_txt = obj.get("md5_text") == null ? codec.md5(_textContent) : (String)obj.get("md5_text");// 数据库中保存的md5_txt编码
+			    
 			    Long _time = (Long)obj.get("time");
-
+			    
 			    if(_md5.equals(md5)){
-			    	// 文章已存在，不需要新增和更新
+			    	// 内容完全一致，不需要新增和更新
 			    	addFlag = false;
 			    	break;
+			    }else if(_md5_txt.equals(md5_txt)){
+			    	// 文本内容完全一致，但是html内容不一致，更新。可能原因是图片或文件url经过重新编译生成
+			    	if("".equals(updateId)){
+			    		updateId = _id;
+			    		time = _time;
+			    	}
 			    }
 			}
 			
 			if(addFlag){
-				// 新增文章
-				result = content.crawlerInsert(object);
-		        JSONObject json = JSONObject.toJSON(result);
-		        if (json.getInt("errorcode") == 0) {
-		            LogsUtils.addLogs("999", "爬虫服务程序", "在[" + ogname + "]栏目下发布了[" + object.getString("mainName") + "]新闻", "1", "PublishArticle");
-		        }else{
-		        	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
-		        }
+				if(!"".equals(updateId)){
+					// 更新文章
+					object.put("_id",updateId);
+					object.put("time",time);
+					updateContent(content, object);
+				}else{
+					// 新增文章
+					addContent(content, object);					
+				}
 			}
 		}
-		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"文章已存在不做更新":result)+"  ***");
+		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"【"+object.getString("mainName")+"】文章已存在不做更新":result)+"  ***");
 		return result;
+	}
+	
+	/**
+	 * 更新文章
+	 * @param content
+	 * @param object
+	 * @param ogname
+	 */
+	public static void updateContent(Content content, JSONObject object){
+		// 新增文章
+		String result = content.crawlerUpdate(object);
+		
+        JSONObject json = JSONObject.toJSON(result);
+        if (json.getInt("errorcode") == 0) {
+            LogsUtils.addLogs("999", "爬虫服务程序", "更新文章【" + object.getString("mainName") + "】成功", "1", "EditArticle");
+            
+        }else{
+        	System.out.println("**************  更新文章【 "+object.getString("mainName")+"】失败  ************** ");
+        }
+	}
+	
+	/**
+	 * 新增文章
+	 * @param content
+	 * @param object
+	 * @param ogname
+	 */
+	public static void addContent(Content content, JSONObject object){
+		// 新增文章
+		String result = content.crawlerInsert(object);
+		
+        JSONObject json = JSONObject.toJSON(result);
+        if (json.getInt("errorcode") == 0) {
+            LogsUtils.addLogs("999", "爬虫服务程序", "新增文章【" + object.getString("mainName") + "】成功", "1", "PublishArticle");
+            
+        }else{
+        	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
+        }
 	}
 	
 	/**
@@ -254,6 +311,12 @@ public class CrawlerDataReceiver {
     public static int RandomNum() {
         int number = (new Random()).nextInt(2147483647) + 1;
         return number;
+    }
+    
+    public static JXDocument initDoc(String domHTML){
+        Document doc = null;
+        doc = Jsoup.parse(domHTML);      
+        return new JXDocument(doc);     
     }
     
     public static void printConspicuousInfo(String[] text){
