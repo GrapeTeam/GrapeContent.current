@@ -178,7 +178,7 @@ public class CrawlerDataReceiver {
 		
 		if(null == objArray){
 			// 新增文章
-			addContent(content, object);
+			result = addContent(content, object);
 		}else{
 			boolean addFlag = true; // 新增文章标识
 			String updateId = ""; // 要更新的记录id
@@ -213,14 +213,15 @@ public class CrawlerDataReceiver {
 					// 更新文章
 					object.put("_id",updateId);
 					object.put("time",time);
-					updateContent(content, object);
+					result = updateContent(content, object);
 				}else{
 					// 新增文章
-					addContent(content, object);					
+					result = addContent(content, object);					
 				}
+			}else{
+				System.out.println("************** 【"+object.getString("mainName")+"】文章已存在不做更新 *************");
 			}
 		}
-		System.out.println("**************  采集信息入库结果： "+("".equals(result)?"【"+object.getString("mainName")+"】文章已存在不做更新":result)+"  ***");
 		return result;
 	}
 	
@@ -230,7 +231,7 @@ public class CrawlerDataReceiver {
 	 * @param object
 	 * @param ogname
 	 */
-	public static void updateContent(Content content, JSONObject object){
+	public static String updateContent(Content content, JSONObject object){
 		// 新增文章
 		String result = content.crawlerUpdate(object);
 		
@@ -241,6 +242,7 @@ public class CrawlerDataReceiver {
         }else{
         	System.out.println("**************  更新文章【 "+object.getString("mainName")+"】失败  ************** ");
         }
+        return result;
 	}
 	
 	/**
@@ -249,7 +251,7 @@ public class CrawlerDataReceiver {
 	 * @param object
 	 * @param ogname
 	 */
-	public static void addContent(Content content, JSONObject object){
+	public static String addContent(Content content, JSONObject object){
 		// 新增文章
 		String result = content.crawlerInsert(object);
 		
@@ -260,6 +262,7 @@ public class CrawlerDataReceiver {
         }else{
         	System.out.println("**************  新增文章【 "+object.getString("mainName")+"】失败  ************** ");
         }
+        return result;
 	}
 	
 	/**
