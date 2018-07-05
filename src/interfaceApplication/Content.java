@@ -504,7 +504,12 @@ public class Content {
         String temptime = "";
         String ogname = "";
         long currentTime = TimeHelper.nowMillis();
+        
+        System.out.println("ArticleInfo处理之前："+ArticleInfo);
+        
         ArticleInfo = codec.DecodeFastJSON(ArticleInfo);
+        
+        System.out.println("ArticleInfo处理之后："+ArticleInfo);
         
         JSONObject object = JSONHelper.string2json(ArticleInfo);
         if (!StringHelper.InvaildString(this.currentWeb)) {
@@ -1145,6 +1150,12 @@ public class Content {
     }
 
     public String ShowPicByGroupId(String wbid, String ogid) {
+    	
+    	if(ogid.equals("5b370186a713aba0d4a9ef93")){
+    		// 铜官区五务公开-最新公开
+    		return showLatestPublic(wbid, ogid);
+    	}
+    	
         JSONArray array = null;
         JSONObject object = null;
 
@@ -2472,4 +2483,95 @@ public class Content {
         return result;
     }
     
+    /**
+     * 最新公开
+     * @param wbid
+     * @param ogid
+     * @return
+     */
+    public String showLatestPublic(String wbid, String ogid) {
+        JSONArray array = new JSONArray();
+        JSONObject object = null;
+        try {
+            wbid = this.model.getRWbid(wbid);
+            ogid = this.getRogid(ogid);
+            if (ogid.contains("errorcode")) {
+                return ogid;
+            }
+
+            // 村务公开 
+            String cwgkJsonStr = appsProxy.proxyCall("/GrapeWebInfo/WebInfo/getAllWeb/int:1/int:1000/s:59816be6c6c204051c9b0c89/s:null").toString();
+            // 居务公开
+            String jwgkJsonStr = appsProxy.proxyCall("/GrapeWebInfo/WebInfo/getAllWeb/int:1/int:1000/s:59816bc0c6c204051c9b0c88/s:null").toString();
+            // 校务公开
+            String xwgkJsonStr = appsProxy.proxyCall("/GrapeWebInfo/WebInfo/getAllWeb/int:1/int:1000/s:59816b9ec6c204051c9b0c87/s:null").toString();
+            // 院务公开
+            String ywgkJsonStr = appsProxy.proxyCall("/GrapeContent/Content/FindNewArc/s:598d7046c6c20403447c4560/int:1/int:10").toString();
+            // 企务公开
+            String qwgkJsonStr = appsProxy.proxyCall("/GrapeContent/Content/FindNewArc/s:598d7021c6c20403447c455f/int:1/int:10").toString();
+            
+            JSONObject cwgkObj = JSONHelper.string2json(cwgkJsonStr);
+            JSONObject jwgkObj = JSONHelper.string2json(jwgkJsonStr);
+            JSONObject xwgkObj = JSONHelper.string2json(xwgkJsonStr);
+            
+            JSONObject ywgkObj = JSONHelper.string2json(ywgkJsonStr);
+            JSONObject qwgkObj = JSONHelper.string2json(qwgkJsonStr);
+            
+    		Date t = new Date();
+    		long nowTime = t.getTime();
+    		List<JSONObject> list = new ArrayList<JSONObject>();
+    		list.add(cwgkObj);
+    		list.add(jwgkObj);
+    		list.add(xwgkObj);
+    		
+    		for(JSONObject target:list){
+                if(target != null && target.getJson("message")!=null && target.getJson("message").getJson("record")!=null){
+                	JSONArray jArr = target.getJson("message").getJson("record").getJsonArray("data");
+                	if(null!=jArr && jArr.size()>0){
+                		for(Object obj:jArr){
+                			JSONObject jObj = (JSONObject)obj;
+                			if(null!=jObj){
+                				String _id = jObj.get("_id").toString();
+                				String artItemStr = appsProxy.proxyCall("/GrapeContent/Content/FindNewArc/s:"+_id+"/int:1/int:10").toString();
+                				
+                				JSONArray itemArr = JSONHelper.string2json(artItemStr).getJson("message").getJson("record").getJsonArray("data");
+                				for(Object item:itemArr){
+                					JSONObject itemObj = (JSONObject)item;
+                    				long time = Long.parseLong(itemObj.get("time").toString());
+                    				if(time+5*24*60*60*1000 > nowTime){
+                    					// 5天内发布的新闻
+                    					array.add(itemObj);
+                    				}else{
+                    					break;
+                    				}
+                				}
+                			}
+                		}
+                	}
+                }
+    		}
+    		
+    		list.clear();
+    		list.add(ywgkObj);
+    		list.add(qwgkObj);
+    		for(JSONObject target:list){
+    			JSONArray itemArr = target.getJson("message").getJson("record").getJsonArray("data");
+    			for(Object item:itemArr){
+    				JSONObject itemObj = (JSONObject)item;
+    				long time = Long.parseLong(itemObj.get("time").toString());
+    				if(time+5*24*60*60*1000 > nowTime){
+    					// 5天内发布的新闻
+    					array.add(itemObj);
+    				}else{
+    					break;
+    				}
+    			}
+    		}
+        } catch (Exception var9) {
+            nlogger.logout("Content.findPicByGroupID: " + var9);
+            array = null;
+        }
+
+        return rMsg.netMSG(true, array);
+    }
 }
