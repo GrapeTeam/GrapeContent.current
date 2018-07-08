@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.bson.types.ObjectId;
@@ -2493,80 +2495,36 @@ public class Content {
         JSONArray array = new JSONArray();
         JSONObject object = null;
         try {
-            wbid = this.model.getRWbid(wbid);
-            ogid = this.getRogid(ogid);
-            if (ogid.contains("errorcode")) {
-                return ogid;
+        	ExecutorService executeService = Executors.newCachedThreadPool();
+            List<GetContentTask> taskList = new ArrayList<GetContentTask>();
+            final appIns currentAppInfo = appsProxy.getCurrentAppInfo();
+            
+            taskList.add(new GetContentTask(currentAppInfo, "cwgk", 5));
+            taskList.add(new GetContentTask(currentAppInfo, "jwgk", 5));
+            taskList.add(new GetContentTask(currentAppInfo, "xwgk", 5));
+            taskList.add(new GetContentTask(currentAppInfo, "ywgk", 5));
+            taskList.add(new GetContentTask(currentAppInfo, "qwgk", 5));
+            
+            List<Future<JSONArray>> resultList = executeService.invokeAll(taskList);
+            // 这里会阻塞等待resultList获取到所有异步执行的结果才会执行 
+            for (Future<JSONArray> future : resultList) {
+                JSONArray arr = future.get();
+                array.addAll(arr);
             }
-
-            // 村务公开 
-            String cwgkJsonStr = appsProxy.proxyCall("/GrapeWebInfo/WebInfo/getAllWeb/int:1/int:1000/s:59816be6c6c204051c9b0c89/s:null").toString();
-            // 居务公开
-            String jwgkJsonStr = appsProxy.proxyCall("/GrapeWebInfo/WebInfo/getAllWeb/int:1/int:1000/s:59816bc0c6c204051c9b0c88/s:null").toString();
-            // 校务公开
-            String xwgkJsonStr = appsProxy.proxyCall("/GrapeWebInfo/WebInfo/getAllWeb/int:1/int:1000/s:59816b9ec6c204051c9b0c87/s:null").toString();
-            // 院务公开
-            String ywgkJsonStr = appsProxy.proxyCall("/GrapeContent/Content/FindNewArc/s:598d7046c6c20403447c4560/int:1/int:10").toString();
-            // 企务公开
-            String qwgkJsonStr = appsProxy.proxyCall("/GrapeContent/Content/FindNewArc/s:598d7021c6c20403447c455f/int:1/int:10").toString();
             
-            JSONObject cwgkObj = JSONHelper.string2json(cwgkJsonStr);
-            JSONObject jwgkObj = JSONHelper.string2json(jwgkJsonStr);
-            JSONObject xwgkObj = JSONHelper.string2json(xwgkJsonStr);
-            
-            JSONObject ywgkObj = JSONHelper.string2json(ywgkJsonStr);
-            JSONObject qwgkObj = JSONHelper.string2json(qwgkJsonStr);
-            
-    		Date t = new Date();
-    		long nowTime = t.getTime();
-    		List<JSONObject> list = new ArrayList<JSONObject>();
-    		list.add(cwgkObj);
-    		list.add(jwgkObj);
-    		list.add(xwgkObj);
-    		
-    		for(JSONObject target:list){
-                if(target != null && target.getJson("message")!=null && target.getJson("message").getJson("record")!=null){
-                	JSONArray jArr = target.getJson("message").getJson("record").getJsonArray("data");
-                	if(null!=jArr && jArr.size()>0){
-                		for(Object obj:jArr){
-                			JSONObject jObj = (JSONObject)obj;
-                			if(null!=jObj){
-                				String _id = jObj.get("_id").toString();
-                				String artItemStr = appsProxy.proxyCall("/GrapeContent/Content/FindNewArc/s:"+_id+"/int:1/int:10").toString();
-                				
-                				JSONArray itemArr = JSONHelper.string2json(artItemStr).getJson("message").getJson("record").getJsonArray("data");
-                				for(Object item:itemArr){
-                					JSONObject itemObj = (JSONObject)item;
-                    				long time = Long.parseLong(itemObj.get("time").toString());
-                    				if(time+5*24*60*60*1000 > nowTime){
-                    					// 5天内发布的新闻
-                    					array.add(itemObj);
-                    				}else{
-                    					break;
-                    				}
-                				}
-                			}
-                		}
-                	}
-                }
-    		}
-    		
-    		list.clear();
-    		list.add(ywgkObj);
-    		list.add(qwgkObj);
-    		for(JSONObject target:list){
-    			JSONArray itemArr = target.getJson("message").getJson("record").getJsonArray("data");
-    			for(Object item:itemArr){
-    				JSONObject itemObj = (JSONObject)item;
-    				long time = Long.parseLong(itemObj.get("time").toString());
-    				if(time+5*24*60*60*1000 > nowTime){
-    					// 5天内发布的新闻
-    					array.add(itemObj);
-    				}else{
-    					break;
-    				}
-    			}
-    		}
+            // 按照time属性倒序排列
+            List<JSONObject> list = new ArrayList<JSONObject> ();
+            JSONObject jsonObj = null;
+            for (int i = 0; i < array.size(); i++) {
+                jsonObj = (JSONObject)array.get(i);
+                list.add(jsonObj);
+            }
+            Collections.sort(list,new MyComparator());
+            array.clear();
+            for (int i = 0; i < list.size(); i++) {
+                jsonObj = list.get(i);
+                array.add(jsonObj);
+            }
         } catch (Exception var9) {
             nlogger.logout("Content.findPicByGroupID: " + var9);
             array = null;
