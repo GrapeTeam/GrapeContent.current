@@ -548,6 +548,16 @@ public class Content {
             object.put("isvisble", 0);
             object.put("isdelete", 0);
             object.put("subID", this.RandomNum());
+            // added by wuren at 20180710
+            String content = object.getString("content");
+            
+            if(content!=null){
+            	if(content.toLowerCase().indexOf("&lt;video src=") > -1){
+            		object.put("isVideo",true);
+            	}else{
+            		object.put("isVideo",false);
+            	}
+            }
             
             String insert = this.insert(object);
             JSONObject json = JSONObject.toJSON(insert);
@@ -837,6 +847,17 @@ public class Content {
                     infos.put("time", time);
                 }
 
+                // added by wuren at 20180710
+                String content = infos.getString("content");
+                
+                if(content!=null){
+                	if(content.toLowerCase().indexOf("&lt;video src=") > -1){
+                		infos.put("isVideo",true);
+                	}else{
+                		infos.put("isVideo",false);
+                	}
+                }
+                
                 temp = this.content.eq("_id", oid).data(infos).updateEx();
                 result = temp != null ? rMsg.netMSG(0, "文章更新成功") : result;
             }
@@ -1170,7 +1191,7 @@ public class Content {
 
             JSONArray condArray = JSONArray.toJSONArray(ogid);
             if (condArray != null && condArray.size() > 0 && StringHelper.InvaildString(wbid)) {
-                array = this.content.or().where(condArray).and().eq("wbid", wbid).eq("slevel", 0).eq("isdelete", 0).eq("isvisble", 0).field("_id,mainName,ogid,time,image,contenturl").desc("isTop").desc("time").desc("sort").desc("_id").limit(100).select();
+                array = this.content.or().where(condArray).and().eq("wbid", wbid).eq("slevel", 0).eq("isdelete", 0).eq("isvisble", 0).field("_id,mainName,ogid,time,image,contenturl,isVideo").desc("isTop").desc("time").desc("sort").desc("_id").limit(100).select();
                 array = this.model.getImgs(array);
                 if (array != null && array.size() > 0) {
                     int l = array.size();
