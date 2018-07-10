@@ -14,9 +14,38 @@ public class CrawlerDataReceiverQW {
 	private String wbid = "594335af1a4769cbf5d04180";
 	
 	// 企业动态,ogid:"594336adc6c204111c8aa93b"
-	public String publishQYDT(){
+	public String publishQYDT_1(){// 铜化集团首页->公司新闻
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		receiveJSON.put("source","铜化集团");
+		return CrawlerDataReceiver.publish(receiveJSON, "594336adc6c204111c8aa93b", wbid);
+	}
+
+	public String publishQYDT_2(){// 普济圩农场首页->农场新闻
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		receiveJSON.put("source","普济圩农场");
+		return CrawlerDataReceiver.publish(receiveJSON, "594336adc6c204111c8aa93b", wbid);
+	}
+	
+	public String publishQYDT_3(){// 建投公司首页->公司要闻
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		receiveJSON.put("source","建投公司");
+		return CrawlerDataReceiver.publish(receiveJSON, "594336adc6c204111c8aa93b", wbid);
+	}
+	
+	public String publishQYDT_4(){// 文投公司首页->公司动态
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		receiveJSON.put("source","文投公司");
+		return CrawlerDataReceiver.publish(receiveJSON, "594336adc6c204111c8aa93b", wbid);
+	}
+	
+	public String publishQYDT_5(){// 交投公司首页->新闻中心
+		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
+		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		receiveJSON.put("source","交投公司");
 		return CrawlerDataReceiver.publish(receiveJSON, "594336adc6c204111c8aa93b", wbid);
 	}
 	
