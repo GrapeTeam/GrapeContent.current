@@ -2520,11 +2520,11 @@ public class Content {
             List<GetContentTask> taskList = new ArrayList<GetContentTask>();
             final appIns currentAppInfo = appsProxy.getCurrentAppInfo();
             
-            taskList.add(new GetContentTask(currentAppInfo, "cwgk", 5));
-            taskList.add(new GetContentTask(currentAppInfo, "jwgk", 5));
-            taskList.add(new GetContentTask(currentAppInfo, "xwgk", 5));
-            taskList.add(new GetContentTask(currentAppInfo, "ywgk", 5));
-            taskList.add(new GetContentTask(currentAppInfo, "qwgk", 5));
+            taskList.add(new GetContentTask(currentAppInfo, "cwgk", 3));
+            taskList.add(new GetContentTask(currentAppInfo, "jwgk", 3));
+            taskList.add(new GetContentTask(currentAppInfo, "xwgk", 3));
+            taskList.add(new GetContentTask(currentAppInfo, "ywgk", 3));
+            taskList.add(new GetContentTask(currentAppInfo, "qwgk", 3));
             
             List<Future<JSONArray>> resultList = executeService.invokeAll(taskList);
             // 这里会阻塞等待resultList获取到所有异步执行的结果才会执行 
