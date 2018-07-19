@@ -130,6 +130,8 @@ public class CrawlerDataReceiver {
         object.put("subName", receiveJSON.get("subtitle"));//副标题
         object.put("souce",receiveJSON.get("source"));// 来源
         object.put("contenturl",receiveJSON.get("contenturl"));// 新闻链接地址
+        object.put("attribute",receiveJSON.get("attribute")==null?object.get("attribute"):receiveJSON.get("attribute"));// 是否轮播
+        object.put("image",receiveJSON.get("image")==null?object.get("image"):receiveJSON.get("image"));// 缩略图
        
         String result = "";
         
