@@ -51,6 +51,10 @@ public class CrawlerDataReceiverTGQ {
 	public String publishSYTPXW(){
 		JSONObject post = (JSONObject) execRequest.getChannelValue(grapeHttpUnit.formdata);
 		JSONObject receiveJSON = CrawlerDataReceiver.parseCrawlerData(post);
+		if(receiveJSON != null){
+			receiveJSON.put("attribute", "1");//轮播
+			receiveJSON.put("content", "");
+		}
 		return CrawlerDataReceiver.publish(receiveJSON, "59899655c6c2041220867141", wbid);
 	}
 	
